@@ -157,6 +157,15 @@ public class BlogsRestController
 	public ResponseEntity<String> updateBlog(@PathVariable("blogid") int blogid,@RequestBody Blog blog)
 	{
 		blog.setBlogid(blogid);
+		Blog tblog=blogDAO.getid(blogid);
+		blog.setBlogname(tblog.getBlogname());
+		blog.setBlogcontent(tblog.getBlogcontent());
+		blog.setCreatedate(tblog.getCreatedate());
+		blog.setLikes(tblog.getDislikes());
+		blog.setDislikes(tblog.getDislikes());
+		blog.setStatus(tblog.getStatus());
+		
+		
 		if(blogDAO.update(blog))
 		{
 			return new ResponseEntity("Success",HttpStatus.OK);
