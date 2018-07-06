@@ -57,6 +57,9 @@ public class BlogsRestController
 		
 		if(blogDAO.add(blog))
 		{
+			
+			
+			
 			return new ResponseEntity<String>("Success",HttpStatus.OK);
 		}
 		else
@@ -106,7 +109,7 @@ public class BlogsRestController
 		}
 	}
 	
-	@GetMapping("/incrementLikes/{blogid}")
+	@GetMapping("/blogLike/{blogid}")
 	public ResponseEntity<String> incrementLikes(@PathVariable("blogid")int blogid)
 	{
 		if(blogDAO.likes(blogid))
@@ -119,7 +122,7 @@ public class BlogsRestController
 		}
 	}
 
-	@GetMapping("/incrementDisLikes/{blogid}")
+	@GetMapping("/blogDisLike/{blogid}")
 	public ResponseEntity<String> incrementDisLikes(@PathVariable("blogid")int blogid)
 	{
 		if(blogDAO.dislikes(blogid))
@@ -150,9 +153,10 @@ public class BlogsRestController
 		}
 	}
 	
-	@PutMapping("/updateBlog")
-	public ResponseEntity<String> updateBlog(@RequestBody Blog blog)
+	@PutMapping("/updateBlog/{blogid}")
+	public ResponseEntity<String> updateBlog(@PathVariable("blogid") int blogid,@RequestBody Blog blog)
 	{
+		blog.setBlogid(blogid);
 		if(blogDAO.update(blog))
 		{
 			return new ResponseEntity("Success",HttpStatus.OK);
@@ -164,8 +168,8 @@ public class BlogsRestController
 	}
 	
 	
-@GetMapping("/getComments/{blogid}")
-public ResponseEntity<List<BlogComment>> getComments(@PathVariable("blogid") int blogid){
+@GetMapping("/getBlogComments/{blogid}")
+public ResponseEntity<List<BlogComment>> getBlogComments(@PathVariable("blogid") int blogid){
    
 	List<BlogComment> list=blogCommentDAO.list();
 	
@@ -177,22 +181,24 @@ public ResponseEntity<List<BlogComment>> getComments(@PathVariable("blogid") int
 	
 }
 	
-@PostMapping("/addBlogComment")
-public ResponseEntity<String> addComment(@RequestBody BlogComment blogcommment){
+@PostMapping("/addBlogComment/{blogid}")
+public ResponseEntity<String> addBlogComment(@PathVariable("blogid") int blogid,@RequestBody BlogComment blogcomment){
 	
-	blogcommment.setCommentdate(new Date());
-	 
-	if(blogCommentDAO.add(blogcommment)) {
+	blogcomment.setCommentdate(new Date());
+	
+	blogcomment.setBlogid(blogid);
+	if(blogCommentDAO.add(blogcomment)) {
 		  return new  ResponseEntity<String>("Success",HttpStatus.OK); 
 	  }else {
 		  return new ResponseEntity<String>("Failure",HttpStatus.NOT_FOUND);
 	  }
 }
 
-@PutMapping("/updateBlogComment")
-public ResponseEntity<String> updateComment(@RequestBody BlogComment blogComment)
+@PutMapping("/updateBlogComment/{commenid}")
+public ResponseEntity<String> updateBlogComment(@PathVariable("commenid") int commenid,@RequestBody BlogComment blogComment)
 {
-   if(blogCommentDAO.update(blogComment)) {
+	blogComment.setCommentid(commenid);
+	if(blogCommentDAO.update(blogComment)) {
 	   return new ResponseEntity<String>("Success",HttpStatus.OK);
    }else {
 	   return new ResponseEntity<String>("Failure",HttpStatus.NOT_FOUND);
