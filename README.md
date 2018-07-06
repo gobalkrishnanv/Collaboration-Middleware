@@ -10,4 +10,5 @@
       <li>UserRestController</li>
       <li>BlogRestController</li>
       <li>ForumRestController</li>
+      <li>FirendRestController</li>
   </ul>
