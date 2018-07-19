@@ -2,6 +2,8 @@ package com.niit.restcontroller;
 
 import java.util.List;
 
+import javax.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.niit.oracle.DAO.FriendDAO;
 import com.niit.oracle.model.Friend;
+import com.niit.oracle.model.UserDetail;
 
 @RestController
 public class FriendRestController {
@@ -22,9 +25,24 @@ FriendDAO frienddao;
 
 Friend friend;
 	
+
+@PostMapping("/friend")
+public ResponseEntity<String> addloginname(@RequestBody Friend friend,HttpSession session){
+	
+	UserDetail login= (UserDetail)session.getAttribute("userDetail");
+	
+	friend.setLoginname(login.getLoginname());
+	
+	if(frienddao.add(friend)) {
+	return new ResponseEntity<String>("OK",HttpStatus.OK);
+	}else {
+	return	new ResponseEntity<String>("NOT",HttpStatus.NOT_FOUND);
+	}
+}
+
 @PostMapping("/sendFriendRequest")
-public ResponseEntity<String> sendFriendRequest( @RequestBody Friend friend){
-	friend.setStatus("NA");
+public ResponseEntity<String> sendFriendRequest( @RequestBody Friend friend,HttpSession session){
+    
 	
 	if(frienddao.add(friend)) {
 		return new ResponseEntity<String>("Success",HttpStatus.OK);
@@ -33,6 +51,7 @@ public ResponseEntity<String> sendFriendRequest( @RequestBody Friend friend){
 	}
 	
 }
+
 
 @GetMapping("/deleteFriendRequest/{friendloginname}")
 public ResponseEntity<String> deleteFriendRequest(@PathVariable("friendloginname") String friendloginname){

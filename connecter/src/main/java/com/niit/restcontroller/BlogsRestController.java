@@ -3,6 +3,8 @@ package com.niit.restcontroller;
 import java.util.Date;
 import java.util.List;
 
+import javax.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +19,7 @@ import com.niit.oracle.DAO.BlogCommentDAO;
 import com.niit.oracle.DAO.BlogDAO;
 import com.niit.oracle.model.Blog;
 import com.niit.oracle.model.BlogComment;
+import com.niit.oracle.model.UserDetail;
 
 
 
@@ -28,7 +31,9 @@ public class BlogsRestController
      
 	@Autowired
 	BlogCommentDAO blogCommentDAO;
-	 
+	
+	
+	
 	@GetMapping("/listBlogs")
 	public ResponseEntity<List<Blog>> listBlogs()
 	{
@@ -45,8 +50,13 @@ public class BlogsRestController
 	}
 	
 	@PostMapping(value="/addBlog")
-	public ResponseEntity<String> insertBlog(@RequestBody Blog blog)
+	public ResponseEntity<String> insertBlog(@RequestBody Blog blog,HttpSession session)
 	{
+		
+		 UserDetail login=(UserDetail)session.getAttribute("userDetail");	
+		  blog.setLoginname(login.getLoginname());
+		
+		
 		blog.setCreatedate(new java.util.Date());
 		blog.setDislikes(0);
 		blog.setLikes(0);
@@ -159,6 +169,7 @@ public class BlogsRestController
 		blog.setBlogid(blogid);
 		Blog tblog=blogDAO.getid(blogid);
 		blog.setBlogname(tblog.getBlogname());
+		blog.setLoginname(tblog.getLoginname());
 		blog.setBlogcontent(tblog.getBlogcontent());
 		blog.setCreatedate(tblog.getCreatedate());
 		blog.setLikes(tblog.getDislikes());
@@ -191,11 +202,19 @@ public ResponseEntity<List<BlogComment>> getBlogComments(@PathVariable("blogid")
 }
 	
 @PostMapping("/addBlogComment/{blogid}")
-public ResponseEntity<String> addBlogComment(@PathVariable("blogid") int blogid,@RequestBody BlogComment blogcomment){
+public ResponseEntity<String> addBlogComment(@PathVariable("blogid") int blogid,@RequestBody BlogComment blogcomment,HttpSession session){
+	
+	
+	
 	
 	blogcomment.setCommentdate(new Date());
 	
 	blogcomment.setBlogid(blogid);
+	UserDetail login=(UserDetail)session.getAttribute("userDetail");	
+	blogcomment.setLoginname(login.getLoginname());
+	
+	
+	
 	if(blogCommentDAO.add(blogcomment)) {
 		  return new  ResponseEntity<String>("Success",HttpStatus.OK); 
 	  }else {
@@ -207,6 +226,13 @@ public ResponseEntity<String> addBlogComment(@PathVariable("blogid") int blogid,
 public ResponseEntity<String> updateBlogComment(@PathVariable("commenid") int commenid,@RequestBody BlogComment blogComment)
 {
 	blogComment.setCommentid(commenid);
+	BlogComment tem=blogCommentDAO.getid(commenid);
+	blogComment.setBlogid(tem.getBlogid());
+	blogComment.setLoginname(tem.getLoginname());
+	blogComment.setCommenttext(tem.getCommenttext());
+	blogComment.setCommentdate(tem.getCommentdate());
+	
+	
 	if(blogCommentDAO.update(blogComment)) {
 	   return new ResponseEntity<String>("Success",HttpStatus.OK);
    }else {

@@ -40,6 +40,7 @@ public class UserRestController
 	public ResponseEntity<UserDetail> checkLogin(@RequestBody UserDetail userDetail,HttpSession session)
 	{
 		UserDetail tempUserDetail=userDAO.getloginname(userDetail.getLoginname());
+		System.out.println(tempUserDetail);
 		if(tempUserDetail!=null)
 		{
 			session.setAttribute("userDetail", tempUserDetail);
