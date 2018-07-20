@@ -1,5 +1,6 @@
 package com.niit.restcontroller;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -53,8 +54,8 @@ public class BlogsRestController
 	public ResponseEntity<String> insertBlog(@RequestBody Blog blog,HttpSession session)
 	{
 		
-		 UserDetail login=(UserDetail)session.getAttribute("userDetail");	
-		  blog.setLoginname(login.getLoginname());
+		 //UserDetail login=(UserDetail)session.getAttribute("userDetail");	
+		  //blog.setLoginname(login.getLoginname());
 		
 		
 		blog.setCreatedate(new java.util.Date());
@@ -149,11 +150,19 @@ public class BlogsRestController
 	public ResponseEntity<String> deleteBlog(@PathVariable("blogid")int blogid)
 	{
 		Blog blog=blogDAO.getid(blogid);
-		BlogComment blogcomment=blogCommentDAO.getid(blogid);
-		 
+		
+		List<BlogComment> list=blogCommentDAO.list();
+		
+		//delete blog and blogcomment for a blog;
+		for(BlogComment blogcomment:list) {
+			if(blogcomment.getBlogid()==blogid) {
+				   
+				    blogCommentDAO.delete(blogcomment);
+             }
+		}
 		  
 		
-		if(blogDAO.delete(blog) && blogCommentDAO.delete(blogcomment))
+		if(blogDAO.delete(blog))
 		{
 			return new ResponseEntity("Success",HttpStatus.OK);
 		}
@@ -168,9 +177,7 @@ public class BlogsRestController
 	{
 		blog.setBlogid(blogid);
 		Blog tblog=blogDAO.getid(blogid);
-		blog.setBlogname(tblog.getBlogname());
 		blog.setLoginname(tblog.getLoginname());
-		blog.setBlogcontent(tblog.getBlogcontent());
 		blog.setCreatedate(tblog.getCreatedate());
 		blog.setLikes(tblog.getDislikes());
 		blog.setDislikes(tblog.getDislikes());
@@ -188,15 +195,44 @@ public class BlogsRestController
 	}
 	
 	
+	@GetMapping("/getBlogComments")
+	public ResponseEntity<List<BlogComment>> getBlogAllComments(){
+	   
+		List<BlogComment> list=blogCommentDAO.list();
+		
+		
+				
+		
+		if(list.size()>0) {
+			return new ResponseEntity<List<BlogComment>>(list,HttpStatus.OK);
+		}else {
+			return new ResponseEntity<List<BlogComment>>(list,HttpStatus.NOT_FOUND);
+		}
+		
+	}	
+	
 @GetMapping("/getBlogComments/{blogid}")
 public ResponseEntity<List<BlogComment>> getBlogComments(@PathVariable("blogid") int blogid){
    
 	List<BlogComment> list=blogCommentDAO.list();
 	
+	
+	List<BlogComment> temp=new ArrayList<BlogComment>();
+	
+	temp.removeAll(temp);
+	
+	for(BlogComment blogcomment:list) {
+		if(blogcomment.getBlogid()==blogid) {
+			temp.add(blogcomment);
+		}
+		
+	}
+	
+	
 	if(list.size()>0) {
-		return new ResponseEntity<List<BlogComment>>(list,HttpStatus.OK);
+		return new ResponseEntity<List<BlogComment>>(temp,HttpStatus.OK);
 	}else {
-		return new ResponseEntity<List<BlogComment>>(list,HttpStatus.NOT_FOUND);
+		return new ResponseEntity<List<BlogComment>>(temp,HttpStatus.NOT_FOUND);
 	}
 	
 }
@@ -210,8 +246,8 @@ public ResponseEntity<String> addBlogComment(@PathVariable("blogid") int blogid,
 	blogcomment.setCommentdate(new Date());
 	
 	blogcomment.setBlogid(blogid);
-	UserDetail login=(UserDetail)session.getAttribute("userDetail");	
-	blogcomment.setLoginname(login.getLoginname());
+	//UserDetail login=(UserDetail)session.getAttribute("userDetail");	
+	//blogcomment.setLoginname(login.getLoginname());
 	
 	
 	
@@ -229,7 +265,6 @@ public ResponseEntity<String> updateBlogComment(@PathVariable("commenid") int co
 	BlogComment tem=blogCommentDAO.getid(commenid);
 	blogComment.setBlogid(tem.getBlogid());
 	blogComment.setLoginname(tem.getLoginname());
-	blogComment.setCommenttext(tem.getCommenttext());
 	blogComment.setCommentdate(tem.getCommentdate());
 	
 	
@@ -242,7 +277,15 @@ public ResponseEntity<String> updateBlogComment(@PathVariable("commenid") int co
 
 }
 
-
+@GetMapping("/deleteBlogComment/{commentid}")
+public ResponseEntity<String> deleteBlogComment(@PathVariable("commentid") int commentid){
+	BlogComment blogcomment=blogCommentDAO.getid(commentid);
+	if(blogCommentDAO.delete(blogcomment)) {
+		return new ResponseEntity<String>("OK",HttpStatus.OK);
+	}else {
+		return new ResponseEntity<String>("NOT",HttpStatus.NOT_FOUND);
+	}
+}
 
 
 
