@@ -1,5 +1,6 @@
 package com.niit.restcontroller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpSession;
@@ -23,7 +24,6 @@ public class FriendRestController {
 @Autowired
 FriendDAO frienddao;
 
-Friend friend;
 	
 
 @PostMapping("/friend")
@@ -31,8 +31,9 @@ public ResponseEntity<String> addloginname(@RequestBody Friend friend,HttpSessio
 	
 	UserDetail login= (UserDetail)session.getAttribute("userDetail");
 	
+	friend.setFriendid(0);
 	friend.setLoginname(login.getLoginname());
-	
+   	session.setAttribute("friend", friend);
 	if(frienddao.add(friend)) {
 	return new ResponseEntity<String>("OK",HttpStatus.OK);
 	}else {
@@ -40,23 +41,46 @@ public ResponseEntity<String> addloginname(@RequestBody Friend friend,HttpSessio
 	}
 }
 
-@PostMapping("/sendFriendRequest")
-public ResponseEntity<String> sendFriendRequest( @RequestBody Friend friend,HttpSession session){
+ 
+@PostMapping("/sendFriendRequest/{from}/{to}")
+public ResponseEntity<String> sendFriendRequest(@PathVariable("from") int from,@PathVariable("to") int to){
+	
+	if(frienddao.sendRequest(from,to)) {
+		return new ResponseEntity<String>("OK",HttpStatus.OK);
+	}else {
+		return new ResponseEntity<String>("NOT",HttpStatus.NOT_FOUND);
+	}
+}
+
+@GetMapping("/acceptFriendRequest/{friendid}")
+public ResponseEntity<String> acceptFriendRequest(@PathVariable("friendid") int friendid){
+	
     
 	
-	if(frienddao.add(friend)) {
-		return new ResponseEntity<String>("Success",HttpStatus.OK);
+	if(frienddao.aspectRequest(friendid)) {
+		return new ResponseEntity<String>("OK",HttpStatus.OK);
 	}else {
-		return new ResponseEntity<String>("Failure",HttpStatus.NOT_FOUND);
+		return new ResponseEntity<String>("NOT",HttpStatus.NOT_FOUND);
 	}
+}
+
+@GetMapping("/rejectFriendRequest/{friendid}")
+public ResponseEntity<String> rejectFriendRequest(@PathVariable("friendid") int friendid){
+   
 	
+    if(frienddao.rejectRequest(friendid)) {
+		return new ResponseEntity<String>("OK",HttpStatus.OK);
+	}else {
+		return new ResponseEntity<String>("NOT",HttpStatus.NOT_FOUND);
+	}
 }
 
 
-@GetMapping("/deleteFriendRequest/{friendloginname}")
-public ResponseEntity<String> deleteFriendRequest(@PathVariable("friendloginname") String friendloginname){
-	Friend friend=frienddao.getfriendloginname(friendloginname);
-	
+
+
+@GetMapping("/deleteFriendRequest/{friendid}")
+public ResponseEntity<String> deleteFriendRequest(@PathVariable("friendid") int  friendid){
+	Friend friend=frienddao.getid(friendid);	
 	
 	if(frienddao.delete(friend)){
 		return new ResponseEntity<String>("Success",HttpStatus.OK);
@@ -65,18 +89,87 @@ public ResponseEntity<String> deleteFriendRequest(@PathVariable("friendloginname
 	}
 }
 
-@GetMapping("/acceptFriendReqest/{friendloginname}")
-public ResponseEntity<String> accpeptFriendRequest(@PathVariable("friendloginname") String friendloginname){
-	Friend friend=frienddao.getfriendloginname(friendloginname);
+@GetMapping("/friendlist/{name}")
+public ResponseEntity<List<Friend>> friendlist(@PathVariable("name") String name){
 	
-	if(frienddao.aspectRequest(friend.getFriendid())) {
-		return new ResponseEntity<String>("Success",HttpStatus.OK);
-	}else {
-		return new ResponseEntity<String>("Failure",HttpStatus.NOT_FOUND);
+	List<Friend> list=frienddao.list();
+	
+	
+	List<Friend> temp=new ArrayList<Friend>();
+    temp.removeAll(temp);
+	
+	for(Friend friend:list) {
+		if((friend.getLoginname().equals(name))&&(friend.getStatus().equals("A"))) {
+			temp.add(friend);
+		}
+		
 	}
+	
+	if(temp.size()>0) {
+		return new ResponseEntity<List<Friend>>(temp,HttpStatus.OK);
+	}else {
+		return new ResponseEntity<List<Friend>>(temp,HttpStatus.NOT_FOUND);
+	}
+	
+	
+	
+	
 }
 
 
+@GetMapping("/suggestedfriendlist/{name}")
+public ResponseEntity<List<Friend>> suggestedFriendlist(@PathVariable("name") String name){
+	
+	List<Friend> list=frienddao.list();
+	
+	
+	List<Friend> temp=new ArrayList<Friend>();
+    temp.removeAll(temp);
+	
+	for(Friend friend:list) {
+		if((friend.getLoginname().equals(name)||(friend.getLoginname().equals("")))&&((friend.getStatus().equals(""))||(friend.getStatus().equals("NA")))) {
+			temp.add(friend);
+		}
+		
+	}
+	
+	if(temp.size()>0) {
+		return new ResponseEntity<List<Friend>>(temp,HttpStatus.OK);
+	}else {
+		return new ResponseEntity<List<Friend>>(temp,HttpStatus.NOT_FOUND);
+	}
+	
+	
+	
+	
+}
+
+@GetMapping("/requestfriendlist/{name}")
+public ResponseEntity<List<Friend>> requestFriendlist(@PathVariable("name") String name){
+	
+	List<Friend> list=frienddao.list();
+	
+	
+	List<Friend> temp=new ArrayList<Friend>();
+    temp.removeAll(temp);
+	
+	for(Friend friend:list) {
+		if((friend.getLoginname().equals(name))&&(friend.getStatus().equals("NA"))) {
+			temp.add(friend);
+		}
+		
+	}
+	
+	if(temp.size()>0) {
+		return new ResponseEntity<List<Friend>>(temp,HttpStatus.OK);
+	}else {
+		return new ResponseEntity<List<Friend>>(temp,HttpStatus.NOT_FOUND);
+	}
+	
+	
+	
+	
+}
 
 
 
