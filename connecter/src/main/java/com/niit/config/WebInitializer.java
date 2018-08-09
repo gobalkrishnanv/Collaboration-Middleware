@@ -13,8 +13,8 @@ public class WebInitializer extends AbstractAnnotationConfigDispatcherServletIni
 {
 	protected void customizeRegistration(ServletRegistration.Dynamic registration)
 	{
-
-     // registration.setAsyncSupported(true);
+     registration.setInitParameter("dispatchOptionsRequest","true");
+     registration.setAsyncSupported(true);
 	}
 
 	@Override
