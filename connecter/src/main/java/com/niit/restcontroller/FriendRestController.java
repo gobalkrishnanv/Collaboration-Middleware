@@ -99,10 +99,11 @@ public ResponseEntity<List<Friend>> friendlist(@PathVariable("name") String name
     temp.removeAll(temp);
 	
 	for(Friend friend:list) {
+		if(friend.getStatus()!=null) {
 		if((friend.getLoginname().equals(name))&&(friend.getStatus().equals("A"))) {
 			temp.add(friend);
 		}
-		
+		}
 	}
 	
 	if(temp.size()>0) {
@@ -121,14 +122,14 @@ public ResponseEntity<List<Friend>> friendlist(@PathVariable("name") String name
 public ResponseEntity<List<Friend>> suggestedFriendlist(@PathVariable("name") String name){
 	
 	List<Friend> list=frienddao.list();
-	
-	
+		
 	List<Friend> temp=new ArrayList<Friend>();
     temp.removeAll(temp);
 	
 	for(Friend friend:list) {
-	System.out.println((friend.getLoginname().compareTo(name)!=0)&&((friend.getStatus().equals(""))));
-		if((friend.getLoginname().compareTo(name)!=0)&&((friend.getStatus().equals("")))) {
+	//System.out.println(friend.getStatus()==null+"---------------");	
+	//System.out.println(friend.getLoginname().compareTo(name)+"---------------");
+		if((friend.getLoginname().compareTo(name)!=0)&&((friend.getStatus()==null))) {
 			temp.add(friend);
 		}
 		
@@ -155,9 +156,18 @@ public ResponseEntity<List<Friend>> requestFriendlist(@PathVariable("name") Stri
     temp.removeAll(temp);
 	
 	for(Friend friend:list) {
-		if((friend.getLoginname().equals(name))&&(friend.getStatus().equals("NA"))) {
-			temp.add(friend);
+		System.out.println((friend.getLoginname().compareTo(name))+"------");
+		
+		if(friend.getStatus()!=null) {
+			
+			System.out.println(friend.getStatus().equals("NA")+"*************");
+			if((friend.getLoginname().compareTo(name)==0)&&(friend.getStatus().equals("NA"))) {
+				temp.add(friend);
+			}
 		}
+		
+		
+		
 		
 	}
 	

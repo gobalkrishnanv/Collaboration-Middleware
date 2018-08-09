@@ -28,6 +28,7 @@ public class WebResolver
 	public CommonsMultipartResolver getMultipartResolver()
 	{
 		CommonsMultipartResolver multipartResolver=new CommonsMultipartResolver();
+		multipartResolver.setDefaultEncoding("utf-8");
 		multipartResolver.setMaxUploadSize(1000000);
 		return multipartResolver;
 	}

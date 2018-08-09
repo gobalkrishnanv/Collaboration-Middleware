@@ -8,7 +8,7 @@ import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 
 @Configuration
 @EnableWebSocketMessageBroker
-@ComponentScan("com.niit")
+@ComponentScan(basePackages="com.niit")
 
 public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer 
 {
