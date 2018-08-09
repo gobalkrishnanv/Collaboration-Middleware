@@ -3,6 +3,8 @@ package com.niit.restcontroller;
 import java.util.Date;
 import java.util.List;
 
+import javax.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.niit.oracle.DAO.JobDetailDAO;
 import com.niit.oracle.model.JobDetail;
+import com.niit.oracle.model.UserDetail;
 
 @RestController
 public class JobRestController {
@@ -35,11 +38,17 @@ public ResponseEntity<List<JobDetail>> joblist(){
 	}
 	
 }
-@PostMapping("/addtjob")
-public ResponseEntity<String> postjob(@RequestBody JobDetail jobdetail){
-    jobdetail.setRole("ROLE_ADMIN");
+@PostMapping("/addjob")
+public ResponseEntity<String> postjob(@RequestBody JobDetail jobdetail,HttpSession session){
+	UserDetail login=(UserDetail)session.getAttribute("userDetail");	
+	jobdetail.setLoginname(login.getLoginname());
+	
+	
+	jobdetail.setRole("admin");
     
 	jobdetail.setLastdate(new Date());
+	jobdetail.setResponse("NA");
+	
 	
 	if(jobdetaildao.add(jobdetail)) {
 		return new ResponseEntity<String>("OK",HttpStatus.OK);
@@ -53,15 +62,11 @@ public ResponseEntity<String> updatejob(@PathVariable("jobid") int jobid,@Reques
 	JobDetail temp=jobdetaildao.getid(jobid);
     
 	jobdetail.setJobid(jobid);
-	jobdetail.setCompany(temp.getCompany());
-	jobdetail.setDesignation(temp.getDesignation());
+	jobdetail.setLoginname(temp.getLoginname());
 	jobdetail.setRole(temp.getRole());
 	jobdetail.setResponse(temp.getResponse());
-	jobdetail.setSkill(temp.getSkill());
 	jobdetail.setLastdate(temp.getLastdate());
-	jobdetail.setLocation(temp.getLocation());
-	jobdetail.setCtc(temp.getCtc());
-	if(jobdetaildao.add(jobdetail)) {
+	if(jobdetaildao.update(jobdetail)) {
 		return new ResponseEntity<String>("OK",HttpStatus.OK);
 	}else {
 		return new ResponseEntity<String>("NOT",HttpStatus.NOT_FOUND);
@@ -78,6 +83,9 @@ public ResponseEntity<String> deletejob(@PathVariable("jobid") int jobid){
 		return new ResponseEntity<String>("NOT",HttpStatus.NOT_FOUND);
 	}
 }
+
+
+
 @GetMapping("/applyjob/{jobid}")
 public ResponseEntity<String> applyjob(@PathVariable("jobid") int jobid){
 	if(jobdetaildao.apply(jobid)) {
@@ -89,8 +97,8 @@ public ResponseEntity<String> applyjob(@PathVariable("jobid") int jobid){
 
 @GetMapping("/rejectjob/{jobid}")
 public ResponseEntity<String> rejectjob(@PathVariable("jobid") int jobid){
-	JobDetail temp=jobdetaildao.getid(jobid);
-	if(jobdetaildao.delete(temp)) {
+	
+	if(jobdetaildao.reject(jobid)) {
 		return new ResponseEntity<String>("OK",HttpStatus.OK);
 	}else {
 		return new ResponseEntity<String>("NOT",HttpStatus.NOT_FOUND);

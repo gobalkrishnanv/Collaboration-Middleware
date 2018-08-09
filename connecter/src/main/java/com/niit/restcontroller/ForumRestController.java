@@ -9,6 +9,7 @@ import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,41 +29,41 @@ import com.niit.oracle.model.UserDetail;
 public class ForumRestController
 {
 	@Autowired
-	ForumDAO forumDAO; 
+	ForumDAO forumDAO;
      
-	@Autowired 
+	@Autowired
 	ForumCommentDAO forumCommentDAO;
 	
 	
 	
 	@GetMapping("/listForums")
-	public ResponseEntity<List<Forum>> listForums()
+	public ResponseEntity<List<Forum>> listForum()
 	{
-		List<Forum> listBlogs=forumDAO.list();
+		List<Forum> listForums=forumDAO.list();
 		
-		if(listBlogs.size()>0)
+		if(listForums.size()>0)
 		{
-			return new ResponseEntity<List<Forum>>(listBlogs,HttpStatus.OK);
+			return new ResponseEntity<List<Forum>>(listForums,HttpStatus.OK);
 		}
 		else
 		{
-			return new ResponseEntity<List<Forum>>(listBlogs,HttpStatus.NOT_FOUND);
+			return new ResponseEntity<List<Forum>>(listForums,HttpStatus.NOT_FOUND);
 		}
 	}
-	
+	 
 	@PostMapping(value="/addForum")
 	public ResponseEntity<String> insertForum(@RequestBody Forum forum,HttpSession session)
 	{
 		
-		 //UserDetail login=(UserDetail)session.getAttribute("userDetail");	
-		  //blog.setLoginname(login.getLoginname());
+		 UserDetail login=(UserDetail)session.getAttribute("userDetail");	
+		  forum.setLoginname(login.getLoginname());
 		
 		
 		forum.setCreatedate(new java.util.Date());
 		forum.setDislikes(0);
 		forum.setLikes(0);
 		forum.setStatus("NA");
-		 
+		
 		
 		
 		
@@ -121,7 +122,7 @@ public class ForumRestController
 	}
 	
 	@GetMapping("/forumLike/{forumid}")
-	public ResponseEntity<String> incrementLikes(@PathVariable("forumid")int forumid)
+	public ResponseEntity<String> ForumLikes(@PathVariable("forumid")int forumid)
 	{
 		if(forumDAO.likes(forumid))
 		{
@@ -134,7 +135,7 @@ public class ForumRestController
 	}
 
 	@GetMapping("/forumDisLike/{forumid}")
-	public ResponseEntity<String> incrementDisLikes(@PathVariable("forumid")int forumid)
+	public ResponseEntity<String> ForumDisLikes(@PathVariable("forumid")int forumid)
 	{
 		if(forumDAO.dislikes(forumid))
 		{
@@ -153,7 +154,7 @@ public class ForumRestController
 		
 		List<ForumComment> list=forumCommentDAO.list();
 		
-		//delete blog and blogcomment for a blog;
+		//delete Forum and Forumcomment for a Forum;
 		for(ForumComment forumcomment:list) {
 			if(forumcomment.getForumid()==forumid) {
 				   
@@ -172,16 +173,27 @@ public class ForumRestController
 		}
 	}
 	
+	
+	
+	@GetMapping("/updateForum")
+	
+	public String redirectupdatepage(Model m){
+		
+		
+		return "redirect:/updateforum";
+		
+	}
 	@PutMapping("/updateForum/{forumid}")
 	public ResponseEntity<String> updateForum(@PathVariable("forumid") int forumid,@RequestBody Forum forum)
 	{
-		forum.setForumid(forumid);
 		Forum tforum=forumDAO.getid(forumid);
+		
+		forum.setForumid(tforum.getForumid());
 		forum.setLoginname(tforum.getLoginname());
 		forum.setCreatedate(tforum.getCreatedate());
 		forum.setLikes(tforum.getDislikes());
 		forum.setDislikes(tforum.getDislikes());
-		forum.setStatus(tforum.getStatus()); 
+		forum.setStatus(tforum.getStatus());
 		
 		
 		if(forumDAO.update(forum))
@@ -200,7 +212,7 @@ public class ForumRestController
 	   
 		List<ForumComment> list=forumCommentDAO.list();
 		
-		
+	    
 				
 		
 		if(list.size()>0) {
@@ -210,6 +222,8 @@ public class ForumRestController
 		}
 		
 	}	
+	
+	
 	
 @GetMapping("/getForumComments/{forumid}")
 public ResponseEntity<List<ForumComment>> getForumComments(@PathVariable("forumid") int forumid){
@@ -241,13 +255,13 @@ public ResponseEntity<List<ForumComment>> getForumComments(@PathVariable("forumi
 public ResponseEntity<String> addForumComment(@PathVariable("forumid") int forumid,@RequestBody ForumComment forumcomment,HttpSession session){
 	
 	
+	UserDetail login=(UserDetail)session.getAttribute("userDetail");	
+	forumcomment.setLoginname(login.getLoginname());
 	
 	
 	forumcomment.setDiscussionDate(new Date());
 	
 	forumcomment.setForumid(forumid);
-	//UserDetail login=(UserDetail)session.getAttribute("userDetail");	
-	//blogcomment.setLoginname(login.getLoginname());
 	
 	
 	
@@ -259,34 +273,43 @@ public ResponseEntity<String> addForumComment(@PathVariable("forumid") int forum
 }
 
 @PutMapping("/updateForumComment/{commenid}")
-public ResponseEntity<String> updateForumComment(@PathVariable("commenid") int commenid,@RequestBody ForumComment forumComment) 
+public ResponseEntity<String> updateForumComment(@PathVariable("commenid") int commenid,@RequestBody ForumComment ForumComment)
 {
-	forumComment.setCommentid(commenid);
+	ForumComment.setCommentid(commenid);
 	ForumComment tem=forumCommentDAO.getid(commenid);
-	forumComment.setForumid(tem.getForumid());
-	forumComment.setLoginname(tem.getLoginname());
-	forumComment.setDiscussionDate(tem.getDiscussionDate());
+	ForumComment.setForumid(tem.getForumid());
+	ForumComment.setLoginname(tem.getLoginname());
+	ForumComment.setDiscussionDate(tem.getDiscussionDate());
 	
 	
-	if(forumCommentDAO.update(forumComment)) {
+	if(forumCommentDAO.update(ForumComment)) {
 	   return new ResponseEntity<String>("Success",HttpStatus.OK);
    }else {
 	   return new ResponseEntity<String>("Failure",HttpStatus.NOT_FOUND);
    }
 	
 
-} 
+}
 
 @GetMapping("/deleteForumComment/{commentid}")
 public ResponseEntity<String> deleteForumComment(@PathVariable("commentid") int commentid){
-	ForumComment forumcomment=forumCommentDAO.getid(commentid);
-	if(forumCommentDAO.delete(forumcomment)) {
+	ForumComment Forumcomment=forumCommentDAO.getid(commentid);
+	if(forumCommentDAO.delete(Forumcomment)) {
 		return new ResponseEntity<String>("OK",HttpStatus.OK);
 	}else {
 		return new ResponseEntity<String>("NOT",HttpStatus.NOT_FOUND);
 	}
 }
 
+@GetMapping("/getfcomment/{commentid}")
+public ResponseEntity<ForumComment> getfcomment(@PathVariable("commentid") int commentid){
+	ForumComment get=forumCommentDAO.getid(commentid);
+	if(get!=null) {
+		return new ResponseEntity<ForumComment>(get,HttpStatus.OK);
+	}else {
+		return new ResponseEntity<ForumComment>(get,HttpStatus.NOT_FOUND);
+	}
+} 
 
 
 }

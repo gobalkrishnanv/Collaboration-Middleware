@@ -9,11 +9,13 @@ import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.niit.oracle.DAO.BlogCommentDAO;
@@ -54,8 +56,8 @@ public class BlogsRestController
 	public ResponseEntity<String> insertBlog(@RequestBody Blog blog,HttpSession session)
 	{
 		
-		 //UserDetail login=(UserDetail)session.getAttribute("userDetail");	
-		  //blog.setLoginname(login.getLoginname());
+		 UserDetail login=(UserDetail)session.getAttribute("userDetail");	
+		 blog.setLoginname(login.getLoginname());
 		
 		
 		blog.setCreatedate(new java.util.Date());
@@ -172,11 +174,22 @@ public class BlogsRestController
 		}
 	}
 	
+	
+	
+	@GetMapping("/updateBlog")
+	
+	public String redirectupdatepage(Model m){
+		
+		
+		return "redirect:/updateBlog";
+		
+	}
 	@PutMapping("/updateBlog/{blogid}")
 	public ResponseEntity<String> updateBlog(@PathVariable("blogid") int blogid,@RequestBody Blog blog)
 	{
-		blog.setBlogid(blogid);
 		Blog tblog=blogDAO.getid(blogid);
+		
+		blog.setBlogid(tblog.getBlogid());
 		blog.setLoginname(tblog.getLoginname());
 		blog.setCreatedate(tblog.getCreatedate());
 		blog.setLikes(tblog.getDislikes());
@@ -200,7 +213,7 @@ public class BlogsRestController
 	   
 		List<BlogComment> list=blogCommentDAO.list();
 		
-		
+	    
 				
 		
 		if(list.size()>0) {
@@ -210,6 +223,8 @@ public class BlogsRestController
 		}
 		
 	}	
+	
+	
 	
 @GetMapping("/getBlogComments/{blogid}")
 public ResponseEntity<List<BlogComment>> getBlogComments(@PathVariable("blogid") int blogid){
@@ -246,8 +261,8 @@ public ResponseEntity<String> addBlogComment(@PathVariable("blogid") int blogid,
 	blogcomment.setCommentdate(new Date());
 	
 	blogcomment.setBlogid(blogid);
-	//UserDetail login=(UserDetail)session.getAttribute("userDetail");	
-	//blogcomment.setLoginname(login.getLoginname());
+    UserDetail login=(UserDetail)session.getAttribute("userDetail");	
+	blogcomment.setLoginname(login.getLoginname());
 	
 	
 	
@@ -287,6 +302,15 @@ public ResponseEntity<String> deleteBlogComment(@PathVariable("commentid") int c
 	}
 }
 
+@GetMapping("/getcomment/{commentid}")
+public ResponseEntity<BlogComment> getcomment(@PathVariable("commentid") int commentid){
+	BlogComment get=blogCommentDAO.getid(commentid);
+	if(get!=null) {
+		return new ResponseEntity<BlogComment>(get,HttpStatus.OK);
+	}else {
+		return new ResponseEntity<BlogComment>(get,HttpStatus.NOT_FOUND);
+	}
+} 
 
 
 }

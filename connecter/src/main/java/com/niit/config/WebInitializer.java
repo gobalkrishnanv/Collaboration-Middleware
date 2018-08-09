@@ -1,5 +1,4 @@
 package com.niit.config;
-
 import java.nio.charset.StandardCharsets;
 
 import javax.servlet.Filter;
@@ -12,16 +11,16 @@ import com.niit.oracle.config.ApplicationContext;
 
 public class WebInitializer extends AbstractAnnotationConfigDispatcherServletInitializer
 {
+	protected void customizeRegistration(ServletRegistration.Dynamic registration)
+	{
 
-	
-	protected void customizeRegistration(ServletRegistration.Dynamic registration) {
-		registration.setInitParameter("dispatchOptionsRequest", "true");
-		registration.setAsyncSupported(true);
+     // registration.setAsyncSupported(true);
 	}
+
 	@Override
 	protected Class<?>[] getRootConfigClasses() 
 	{
-		return new Class[] {WebResolver.class,ApplicationContext.class,WebSocketConfig.class};
+		return new Class[] {WebResolver.class,ApplicationContext.class};
 	}
 
 	@Override
@@ -35,13 +34,11 @@ public class WebInitializer extends AbstractAnnotationConfigDispatcherServletIni
 	{
 		return new String[] {"/"};
 	}
-	
-    protected Filter[] getServletFilter()
-    {
-    	CharacterEncodingFilter encodingfilter=new CharacterEncodingFilter();
-    	encodingfilter.setEncoding(StandardCharsets.UTF_8.name());
-    	return new Filter[] {encodingfilter};
-    	
-    }
 
+	protected Filter[] getServletFilter()
+	{
+		CharacterEncodingFilter encodingFilter=new CharacterEncodingFilter();
+		encodingFilter.setEncoding(StandardCharsets.UTF_8.name());
+		return new Filter[] {encodingFilter};
+	}
 }

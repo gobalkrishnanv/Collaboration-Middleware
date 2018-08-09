@@ -127,7 +127,8 @@ public ResponseEntity<List<Friend>> suggestedFriendlist(@PathVariable("name") St
     temp.removeAll(temp);
 	
 	for(Friend friend:list) {
-		if((friend.getLoginname().equals(name)||(friend.getLoginname().equals("")))&&((friend.getStatus().equals(""))||(friend.getStatus().equals("NA")))) {
+	System.out.println((friend.getLoginname().compareTo(name)!=0)&&((friend.getStatus().equals(""))));
+		if((friend.getLoginname().compareTo(name)!=0)&&((friend.getStatus().equals("")))) {
 			temp.add(friend);
 		}
 		
@@ -172,5 +173,21 @@ public ResponseEntity<List<Friend>> requestFriendlist(@PathVariable("name") Stri
 }
 
 
+@GetMapping("/getfriend/{name}")
+public ResponseEntity<Friend> getfriend(@PathVariable("name") String name){
+	List<Friend> fs=frienddao.list();
+	int i=0,j=0;
+	Friend temp=null;
+	for(Friend f:fs) {
+	 if(f.getLoginname().equals(name)) {
+		 temp=f;
+	 }
+	}
+	if(temp!=null) {
+		return new ResponseEntity<Friend>(temp,HttpStatus.OK);
+	}else {
+		return new ResponseEntity<Friend>(temp,HttpStatus.NOT_FOUND);
+	}
+}
 
 }
